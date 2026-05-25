@@ -28,3 +28,5 @@ MANIFEST
 .vscode/
 .history/
 models/
+models_*/
+*.log
