@@ -26,4 +26,4 @@ DEVICE="GPU"
 echo "Starting on $DEVICE. Model: $MODEL_REPO"
 export OV_GPU_FP16_SKIP_OPTIMIZATION=1
 
-python3 ov_server.py --model "$MODEL_DIR" --device "$DEVICE" --port "$PORT"
+python3 ov_server.py --model "$MODEL_DIR" --device "$DEVICE" --port "$PORT" --n_ctx 32768

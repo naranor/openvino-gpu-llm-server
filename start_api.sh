@@ -36,4 +36,4 @@ echo "Model: $MODEL_DIR"
 export OV_GPU_FP16_SKIP_OPTIMIZATION=1
 
 # Run the python server
-python3 ov_server.py --model "$MODEL_DIR" --device "$DEVICE" --port "$PORT"
+python3 ov_server.py --model "$MODEL_DIR" --device "$DEVICE" --port "$PORT" --n_ctx 32768
