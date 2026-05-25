@@ -13,6 +13,7 @@ All benchmarks and tests were conducted on the following hardware:
 *   **CPU:** Intel(R) Core(TM) i7-8565U @ 1.80GHz (4 Cores / 8 Threads)
 *   **GPU:** Intel(R) UHD Graphics 620 (Integrated, Gen 9.5)
 *   **RAM:** 32 GB DDR4 (Shared with GPU via Level Zero)
+*   **Disk:** WD Black SN750 NVMe SSD (High-speed model loading)
 *   **OS:** Linux (Ubuntu 24.04 LTS)
 *   **Runtime:** OpenVINO™ 2026.1.0 with oneAPI Level Zero driver
 
