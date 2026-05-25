@@ -13,13 +13,13 @@ if [ -f "/opt/intel/oneapi/setvars.sh" ]; then
 fi
 
 # 2. Model Configuration
-# We use DeepSeek-R1-Distill-Qwen-1.5B-int8-ov: The best reasoning/coding model for 1.5B class (May 2026)
-# INT8 is stable and fast on Intel Gen 9.5 GPU
-MODEL_REPO="OpenVINO/DeepSeek-R1-Distill-Qwen-1.5B-int8-ov"
-MODEL_DIR="models/DeepSeek-R1-Distill-Qwen-1.5B-int8-ov"
+# We use DeepSeek-R1-Distill-Qwen-7B-int8-ov: The most powerful reasoning model that fits the shared memory limits
+# Verified to bypass the 4GB max_alloc limit by chunking layers in OpenVINO
+MODEL_REPO="OpenVINO/DeepSeek-R1-Distill-Qwen-7B-int8-ov"
+MODEL_DIR="models/DeepSeek-R1-Distill-Qwen-7B-int8-ov"
 
 if [ ! -d "$MODEL_DIR" ]; then
-    echo "Downloading DeepSeek-R1 reasoning model (INT8 OpenVINO)..."
+    echo "Downloading DeepSeek-R1 7B reasoning model (INT8 OpenVINO)..."
     python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='$MODEL_REPO', local_dir='$MODEL_DIR')"
 else
     echo "Model already exists in $MODEL_DIR"
