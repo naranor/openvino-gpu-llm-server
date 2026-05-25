@@ -28,13 +28,15 @@ The development of this server involved a rigorous research phase to overcome ha
 
 ## 📦 Supported Models (Pre-configured)
 
-| Model Name | Optimization | Size | Best For... |
-| :--- | :--- | :--- | :--- |
-| **DeepSeek-R1-Distill-Qwen-7B** | INT8 | ~7.5 GB | **Coding & Reasoning (Recommended)** |
-| **Qwen3-8B-Instruct** | INT8 | ~8.5 GB | **Raw Generation Speed** |
-| **Qwen2.5-Coder-7B-Instruct** | INT8 | ~7.5 GB | **Reliable Code Completion** |
-| **Gemma-3-12B-it** | INT8 | ~13 GB | **Vision & Multimodal Tasks** |
-| **DeepSeek-R1-Distill-Qwen-1.5B**| INT8 | ~1.7 GB | **Ultra-low latency** |
+Verified performance on **Intel UHD 620** (Shared Memory enabled):
+
+| Model Name | Optimization | Speed (t/s) | Load Time | Best For... |
+| :--- | :--- | :--- | :--- | :--- |
+| **DeepSeek-R1-Distill-Qwen-7B** | INT8 | **3.01** | 22s | **Coding & Reasoning (Recommended)** |
+| **Qwen3-8B-Instruct** | INT8 | **2.71** | 31s | **Raw Generation Speed** |
+| **Qwen2.5-Coder-7B-Instruct** | INT8 | **2.46** | 28s | **Reliable Code Completion** |
+| **DeepSeek-R1-Distill-Qwen-1.5B**| INT8 | **12.12**| 4s | **Ultra-low latency** |
+| **Gemma-3-12B-it** | INT8 | N/A | 47s | **Vision (Better on CPU)** |
 
 ## 🛠 Installation
 
