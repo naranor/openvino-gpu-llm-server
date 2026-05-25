@@ -8,7 +8,13 @@ This project provides a robust, production-ready environment for running large-s
 
 ## 🧪 Technical Investigation & Rationale (May 2026)
 
-The development of this server involved a rigorous research phase to overcome hardware-specific limitations of Intel Gen 9.5 (UHD 620) graphics.
+### Hardware Specification (Benchmark Host)
+All benchmarks and tests were conducted on the following hardware:
+*   **CPU:** Intel(R) Core(TM) i7-8565U @ 1.80GHz (4 Cores / 8 Threads)
+*   **GPU:** Intel(R) UHD Graphics 620 (Integrated, Gen 9.5)
+*   **RAM:** 32 GB DDR4 (Shared with GPU via Level Zero)
+*   **OS:** Linux (Ubuntu 24.04 LTS)
+*   **Runtime:** OpenVINO™ 2026.1.0 with oneAPI Level Zero driver
 
 ### 1. The Memory Wall: Bypassing the 4GB Aperture
 *   **Challenge:** Standard OpenCL/GPU drivers often impose a 4GB segment limit for iGPUs.
