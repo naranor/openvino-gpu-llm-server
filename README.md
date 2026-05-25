@@ -30,13 +30,14 @@ The development of this server involved a rigorous research phase to overcome ha
 
 Verified performance on **Intel UHD 620** (Shared Memory enabled):
 
-| Model Name | Optimization | Speed (t/s) | Load Time | Best For... |
-| :--- | :--- | :--- | :--- | :--- |
-| **DeepSeek-R1-Distill-Qwen-7B** | INT8 | **3.01** | 22s | **Coding & Reasoning (Recommended)** |
-| **Qwen3-8B-Instruct** | INT8 | **2.71** | 31s | **Raw Generation Speed** |
-| **Qwen2.5-Coder-7B-Instruct** | INT8 | **2.46** | 28s | **Reliable Code Completion** |
-| **DeepSeek-R1-Distill-Qwen-1.5B**| INT8 | **12.12**| 4s | **Ultra-low latency** |
-| **Gemma-3-12B-it** | INT8 | N/A | 47s | **Vision (Better on CPU)** |
+| Model Name | Optimization | GPU Speed | CPU Speed | GPU Load | Best For... |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **DeepSeek-R1-Distill-Qwen-7B** | INT8 | **3.01 t/s** | 2.44 t/s | 22s | **Reasoning (7B)** |
+| **Qwen3-8B-Instruct** | INT8 | **2.71 t/s** | 2.29 t/s | 31s | **SOTA Speed (8B)** |
+| **Qwen2.5-Coder-7B-Instruct** | INT8 | **2.46 t/s** | 2.02 t/s | 28s | **Reliable Coder** |
+| **DeepSeek-R1-Distill-Qwen-1.5B**| INT8 | **12.12 t/s**| 10.50 t/s| 4s | **Low Latency** |
+| **Gemma-3-12B-it** | INT8 | N/A | N/A | 47s | **Vision/Heavy** |
+
 
 ## 🛠 Installation
 

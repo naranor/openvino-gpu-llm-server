@@ -3,13 +3,15 @@ import time
 import sys
 import os
 
-def benchmark(model_dir):
-    device = "GPU"
+def benchmark(model_dir, device="GPU"):
     print(f"Benchmarking {model_dir} on {device}...")
     
     try:
-        # Set stability flag
-        os.environ["OV_GPU_FP16_SKIP_OPTIMIZATION"] = "1"
+        # Set stability flag only for GPU
+        if device == "GPU":
+            os.environ["OV_GPU_FP16_SKIP_OPTIMIZATION"] = "1"
+        else:
+            os.environ.pop("OV_GPU_FP16_SKIP_OPTIMIZATION", None)
         
         start_load = time.time()
         pipe = ov_genai.LLMPipeline(model_dir, device)
@@ -58,6 +60,8 @@ def benchmark(model_dir):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python benchmark.py <model_dir>")
+        print("Usage: python benchmark.py <model_dir> [device]")
         sys.exit(1)
-    benchmark(sys.argv[1])
+    
+    device = sys.argv[2] if len(sys.argv) > 2 else "GPU"
+    benchmark(sys.argv[1], device)
