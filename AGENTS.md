@@ -73,6 +73,16 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
+## 5. Mandatory Project Rules
+
+- **NO UNAPPROVED PUSHES:** NEVER push changes to remote repositories (GitHub, etc.) without explicit approval from the user. Local commits are allowed.
+- **VENV FOR PIP EXPERIMENTS:** ALWAYS create and use a virtual environment (`venv`) when experimenting with `pip install --force-reinstall` or any potentially breaking dependency changes to avoid breaking the system environment.
+- **VERIFY SIGNATURES:** ALWAYS verify API signatures, method names, and class structures (using `dir()`, `help()`, or test scripts) before implementing code using external libraries. Do not guess.
+- **LOGGING PRESERVATION:** NEVER remove or comment out existing logging/debug statements. You may only add new logging. All logs must include high-resolution timestamps.
+- **GPU-ONLY MANDATE:** Maintain the requirement for GPU acceleration on Intel UHD 620 using OpenVINO. Use 32k context stability via small batch processing (128-512 tokens) for all models.
+
+---
+
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
