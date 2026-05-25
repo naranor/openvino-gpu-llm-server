@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+openvino-genai
+huggingface_hub
+pydantic
+optimum-intel
+numpy
