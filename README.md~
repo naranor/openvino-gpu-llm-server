@@ -1,6 +1,6 @@
 # OpenVINO GPU LLM Server
 
-An experimental OpenAI-compatible API server optimized for LLM inference on **Intel Integrated GPUs (iGPU)**. Specifically engineered for the Intel UHD 620 generation and beyond, utilizing the **OpenVINO GenAI** backend and **oneAPI Level Zero** driver.
+An experimental OpenAI-compatible API server optimized for high-performance LLM inference on **Intel Integrated GPUs (iGPU)**. Specifically engineered for the Intel UHD 620 generation and beyond, utilizing the **OpenVINO GenAI** backend and **oneAPI Level Zero** driver.
 
 ## Overview
 
