@@ -32,8 +32,11 @@ DEVICE="GPU"
 echo "Starting OpenVINO server on port $PORT using $DEVICE..."
 echo "Model: $MODEL_DIR"
 
-# Set stability flags
+# Set stability flags for Intel Gen 9.5
 export OV_GPU_FP16_SKIP_OPTIMIZATION=1
+export GPU_DISABLE_WINOGRAD_CONVOLUTION=1
+export OPENVINO_LOG_LEVEL=0
+export OV_GPU_WAIT_TYPE=SLEEP
 
 # Run the python server
 python3 ov_server.py --model "$MODEL_DIR" --device "$DEVICE" --port "$PORT" --n_ctx 32768
