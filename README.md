@@ -36,7 +36,7 @@ Verified performance on **Intel UHD 620** (Shared Memory enabled):
 | **Qwen3-8B-Instruct** | INT8 | **2.71 t/s** | 2.29 t/s | 31s | **SOTA Speed (8B)** |
 | **Qwen2.5-Coder-7B-Instruct** | INT8 | **2.46 t/s** | 2.02 t/s | 28s | **Reliable Coder** |
 | **DeepSeek-R1-Distill-Qwen-1.5B**| INT8 | **12.12 t/s**| 10.50 t/s| 4s | **Low Latency** |
-| **Gemma-3-12B-it** | INT8 | N/A | N/A | 47s | **Vision/Heavy** |
+| **Gemma-2-9B-it** | INT8 | **1.78 t/s** | 1.39 t/s | 40s | **Pure Logic (9B)** |
 
 
 ## 🛠 Installation
