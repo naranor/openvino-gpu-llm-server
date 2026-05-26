@@ -315,7 +315,7 @@ if __name__ == "__main__":
         logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
 
         model_name = args.model
-        logger.info(f"Server starting. Model: {args.model}, Device: {args.device}, Context: {args.n_ctx}")
+        logger.info(f"Server starting. Model: {args.model}, Device: {args.device}, Context: {args.n_ctx}, Max tokens: {args.max_tokens}")
         
         global_config = {
             'temperature': args.temperature,
