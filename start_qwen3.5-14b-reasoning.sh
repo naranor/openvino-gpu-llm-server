@@ -1,17 +1,18 @@
 #!/bin/bash
 set -e
-echo "=== OpenVINO GPU API Server: Qwen 3.5 4B Instruct (GGUF) ==="
+echo "=== OpenVINO GPU API Server: Qwen 3.5 14B Reasoning (GGUF) ==="
 
 # 1. Environment
 if [ -f "/opt/intel/oneapi/setvars.sh" ]; then source /opt/intel/oneapi/setvars.sh; fi
 
 # 2. Model Configuration
-MODEL_REPO="bartowski/Qwen_Qwen3.5-4B-GGUF"
-MODEL_FILE="Qwen_Qwen3.5-4B-Q4_K_M.gguf"
-MODEL_DIR="models_gguf/qwen3.5-4b"
+# This is a high-performance reasoning model distilled with Opus 4.6 logic
+MODEL_REPO="Oleg-On/Qwen3.5-14B-A3B-Claude-4.6-Opus-Reasoning-Distilled-reap-Q4_K_M-GGUF"
+MODEL_FILE="qwen3.5-14b-a3b-claude-4.6-opus-reasoning-distilled-reap-q4_k_m.gguf"
+MODEL_DIR="models_gguf/qwen3.5-14b-reasoning"
 
 if [ ! -f "$MODEL_DIR/$MODEL_FILE" ]; then
-    echo "Downloading Qwen 3.5 4B GGUF..."
+    echo "Downloading Qwen 3.5 14B Reasoning GGUF (~10GB)..."
     mkdir -p "$MODEL_DIR"
     python3 -c "from huggingface_hub import hf_hub_download; hf_hub_download(repo_id='$MODEL_REPO', filename='$MODEL_FILE', local_dir='$MODEL_DIR')"
 fi
