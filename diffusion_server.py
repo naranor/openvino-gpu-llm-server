@@ -58,26 +58,75 @@ def softmax(x, axis=-1):
     e_x = np.exp(x - np.max(x, axis=axis, keepdims=True))
     return e_x / e_x.sum(axis=axis, keepdims=True)
 
-def sample_tokens_numpy(logits, temperature=0.0, top_p=None, top_k=None):
-    if temperature > 0:
-        logits = logits / temperature
-    if top_k is not None and top_k > 0:
-        indices_to_remove = logits < np.partition(logits, -top_k, axis=-1)[..., -top_k, None]
-        logits = np.copy(logits)
-        logits[indices_to_remove] = -np.inf
+def predict_and_score(logits, temperature=0.0):
     probs = softmax(logits)
     if temperature > 0:
+        logits = logits / temperature
+        # Simple sampling
         res_indices = []
         res_confidences = []
         for i in range(probs.shape[0]):
             idx = np.random.choice(probs.shape[1], p=probs[i])
             res_indices.append(idx)
             res_confidences.append(probs[i, idx])
-        return np.array(res_confidences), np.array(res_indices)
+        return np.array(res_indices), np.array(res_confidences)
     else:
         indices = np.argmax(probs, axis=-1)
         confidences = np.max(probs, axis=-1)
-        return confidences, indices
+        return indices, confidences
+
+def commit_with_local_leap(x, mask_logits, mask_index, num_to_sample, temperature=0.0):
+    # LocalLeap Parameters
+    anchor_threshold = 0.9
+    neighbor_threshold = 0.5
+    radius = 2
+
+    # 1. Predict all masked positions
+    x0_masked, confidence_masked = predict_and_score(mask_logits, temperature)
+    
+    # Map back to full sequence coordinates
+    mask_flat_indices = np.where(mask_index.flatten())[0]
+    L = x.shape[1]
+    
+    # Initialize full confidence and x0 arrays
+    confidence = np.full(L, -np.inf)
+    confidence[mask_flat_indices] = confidence_masked
+    
+    x0 = np.copy(x[0])
+    x0[mask_flat_indices] = x0_masked
+    
+    new_x = np.copy(x[0])
+    
+    if num_to_sample <= 0:
+        return new_x.reshape(1, -1)
+        
+    # 2. Find standard top-k anchors
+    # We only care about currently masked positions
+    valid_confidences = confidence[mask_flat_indices]
+    topk_local_indices = np.argsort(valid_confidences)[-num_to_sample:]
+    topk_global_indices = mask_flat_indices[topk_local_indices]
+    
+    # Commit anchors
+    new_x[topk_global_indices] = x0[topk_global_indices]
+    
+    # 3. LocalLeap: Expand around strong anchors
+    strong_anchors = topk_global_indices[confidence[topk_global_indices] >= anchor_threshold]
+    
+    if len(strong_anchors) > 0:
+        offsets = np.arange(-radius, radius + 1)
+        # Create broadcasted additions for neighbors
+        neighbor_pos = (strong_anchors[:, None] + offsets[None, :]).clip(0, L - 1).flatten()
+        neighbor_pos = np.unique(neighbor_pos)
+        
+        # Keep only masked positions that meet the neighbor threshold
+        valid_neighbors = np.intersect1d(neighbor_pos, mask_flat_indices)
+        keep = confidence[valid_neighbors] >= neighbor_threshold
+        commit_pos = valid_neighbors[keep]
+        
+        if len(commit_pos) > 0:
+            new_x[commit_pos] = x0[commit_pos]
+            
+    return new_x.reshape(1, -1)
 
 def model_loader_thread(model_path, device):
     global model, tokenizer, config, is_ready
@@ -179,20 +228,16 @@ async def chat_completions(request: Request, body: CompletionRequest):
             logits = res[0] 
             
             # Dream architecture requires a logit shift
-            logits = np.concatenate([logits[:, :1, :], logits[:, :-1, :]], axis=1)
+            if "Dream" in model_name:
+                logits = np.concatenate([logits[:, :1, :], logits[:, :-1, :]], axis=1)
             
             mask_logits = logits[mask_index]
             t, s = timesteps[i], timesteps[i + 1]
             p_transfer = 1 - s / t if i < steps - 1 else 1
             num_to_sample = int(np.sum(mask_index) * p_transfer)
             
-            confidence, x0 = sample_tokens_numpy(mask_logits, temperature=body.temperature, top_p=body.top_p, top_k=body.top_k)
-            
-            if num_to_sample > 0:
-                topk_indices = np.argsort(confidence)[-num_to_sample:]
-                mask_flat_indices = np.where(mask_index.flatten())[0]
-                selected_flat_indices = mask_flat_indices[topk_indices]
-                x.flat[selected_flat_indices] = x0[topk_indices]
+            # Apply LocalLeap Commit
+            x = commit_with_local_leap(x, mask_logits, mask_index, num_to_sample, body.temperature)
 
         duration = time.perf_counter() - start_gen
         generated_ids = x[0, input_len:]
