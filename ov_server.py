@@ -327,6 +327,7 @@ if __name__ == "__main__":
         scheduler_config.max_num_batched_tokens = args.batch_size
         scheduler_config.num_kv_blocks = args.n_ctx // 16
         scheduler_config.dynamic_split_fuse = True
+        scheduler_config.enable_prefix_caching = True
         
         logger.info("Initializing ContinuousBatchingPipeline...")
         pipe = ov_genai.ContinuousBatchingPipeline(args.model, scheduler_config, args.device)
