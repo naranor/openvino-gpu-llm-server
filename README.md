@@ -111,6 +111,7 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 
 ## Project Structure
 *   `ov_server.py`: Core FastAPI wrapper for OpenVINO GenAI.
+*   `diffusion_server.py`: Core FastAPI wrapper to run diffusion llms
 *   `start_*.sh`: Model-specific orchestration scripts.
 *   `test_ov.py`: Diagnostic tool for GPU memory and device properties.
 *   `requirements.txt`: Python dependencies.
