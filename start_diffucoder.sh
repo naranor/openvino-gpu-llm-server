@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "=== OpenVINO Diffusion Text Server: Dream-Coder-7B (naranor/HF) ==="
+echo "=== OpenVINO Diffusion Text Server: DiffuCoder-7B (naranor/HF) ==="
 
 # 1. Environment & Stability Flags (Crucial for Intel UHD 620)
 if [ -f "/opt/intel/oneapi/setvars.sh" ]; then
@@ -13,13 +13,13 @@ export GPU_DISABLE_WINOGRAD_CONVOLUTION=1
 export OV_GPU_WAIT_TYPE=SLEEP
 
 # 2. Model Configuration
-MODEL_REPO="naranor/Dream-Coder-7B-ov-int8"
-FINAL_OV_DIR="models/Dream-Coder-7B-ov-int8"
+MODEL_REPO="naranor/DiffuCoder-7B-Instruct-ov-int8"
+FINAL_OV_DIR="models/DiffuCoder-7B-Instruct-ov-int8"
 
 # Step 1: Check if model exists and is valid
 if [ ! -s "$FINAL_OV_DIR/model.xml" ]; then
     echo "Pre-converted OpenVINO model not found locally."
-    echo "Downloading Dream-Coder-7B (INT8 OpenVINO) from $MODEL_REPO..."
+    echo "Downloading DiffuCoder-7B (INT8 OpenVINO) from $MODEL_REPO..."
     python3 -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='$MODEL_REPO', local_dir='$FINAL_OV_DIR')"
     echo "Download complete."
 else
@@ -27,11 +27,11 @@ else
 fi
 
 # 3. Execution
-PORT=8002
+PORT=8001
 DEVICE="GPU"
 LOG_LEVEL=${1:-"INFO"}
 
-echo "Starting Dream-Coder Server on $DEVICE (Port $PORT)"
+echo "Starting Diffusion Server on $DEVICE (Port $PORT)"
 python3 diffusion_server.py \
     --model "$FINAL_OV_DIR" \
     --device "$DEVICE" \
