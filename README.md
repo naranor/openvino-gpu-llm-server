@@ -45,6 +45,27 @@ Verified performance on **Intel UHD 620** (Shared Memory enabled):
 | **DeepSeek-R1-Distill-Qwen-1.5B**| INT8 | **12.12 t/s**| 10.50 t/s| 4s | **Low Latency** |
 | **Gemma-2-9B-it** | INT8 | **1.78 t/s** | 1.39 t/s | 40s | **Pure Logic (9B)** |
 
+## Diffusion Text Models (dLLMs)
+
+Starting June 2026, we have introduced support for **Discrete Diffusion Language Models** optimized for block-based code generation. Unlike autoregressive models, these models generate entire blocks of code iteratively, providing superior context awareness and structural integrity.
+
+### Optimized Diffusion Pipeline
+Our implementation features the **LocalLeap (Anchor-Propagation)** algorithm, which allows the model to commit confident neighboring tokens alongside anchors, significantly reducing the number of diffusion steps required for high-quality output.
+
+| Model Name | Optimization | Port | Use Case |
+| :--- | :--- | :--- | :--- |
+| **DiffuCoder-7B** | INT8 | **8001** | Coherent code generation with bidirectional context. |
+| **Dream-Coder-7B** | INT8 | **8002** | SOTA 2025 diffusion model for complex architectural tasks. |
+
+### Running Diffusion Models
+Diffusion models use a separate server module and dedicated ports:
+```bash
+# Launch DiffuCoder
+./start_diffucoder.sh
+
+# Launch Dream-Coder
+./start_dream_coder.sh
+```
 
 ## Installation
 
