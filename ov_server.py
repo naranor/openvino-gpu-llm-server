@@ -176,6 +176,8 @@ async def health():
         "model_loaded": pipe is not None,
         "model": model_name,
         "active_requests": len(active_requests),
+        "kv_cache_precision": global_config.get("kv_cache_precision"),
+        "cache_eviction": global_config.get("cache_eviction"),
     }
 
 @app.get("/v1/models")
@@ -301,6 +303,31 @@ async def chat_completions(request: Request, body: ChatCompletionRequest):
         logger.error(f"[{request_id}] Error in chat_completions: {e}\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=str(e))
 
+def build_scheduler_config(n_ctx: int, batch_size: int, enable_cache_eviction: bool) -> ov_genai.SchedulerConfig:
+    scheduler_config = ov_genai.SchedulerConfig()
+    scheduler_config.max_num_batched_tokens = batch_size
+    scheduler_config.num_kv_blocks = n_ctx // 16
+    scheduler_config.dynamic_split_fuse = True
+    scheduler_config.enable_prefix_caching = True
+
+    if enable_cache_eviction:
+        # apply_rotation=False is required when using INT4 KV cache (OpenVINO 2026.2)
+        scheduler_config.cache_eviction_config = ov_genai.CacheEvictionConfig(
+            start_size=32,
+            recent_size=128,
+            max_cache_size=2048,
+            aggregation_mode=ov_genai.AggregationMode.NORM_SUM,
+            apply_rotation=False,
+            snapkv_window_size=8,
+            kvcrush_config=ov_genai.KVCrushConfig(
+                budget=2,
+                anchor_point_mode=ov_genai.KVCrushAnchorPointMode.MEAN,
+            ),
+        )
+        scheduler_config.use_cache_eviction = True
+
+    return scheduler_config
+
 if __name__ == "__main__":
     try:
         parser = argparse.ArgumentParser(description="OpenVINO OpenAI Compatible API Server")
@@ -314,28 +341,46 @@ if __name__ == "__main__":
         parser.add_argument("--top_p", type=float, default=0.9, help="Default top_p")
         parser.add_argument("--max_tokens", type=int, default=4096, help="Default max new tokens")
         parser.add_argument("--log_level", type=str, default="INFO", help="Logging level (DEBUG, INFO, WARNING, ERROR)")
+        parser.add_argument(
+            "--kv-cache-precision",
+            type=str,
+            default="u4",
+            choices=["u4", "u8", "i8", "f16"],
+            help="KV cache precision on GPU (u4 saves ~44%% RAM vs u8)",
+        )
+        parser.add_argument(
+            "--no-cache-eviction",
+            action="store_true",
+            help="Disable KV cache eviction and KVCrush (not recommended with u4 KV)",
+        )
         args = parser.parse_args()
 
         # Update logging level from args
         logging.getLogger().setLevel(getattr(logging, args.log_level.upper()))
 
         model_name = args.model
-        logger.info(f"Server starting. Model: {args.model}, Device: {args.device}, Context: {args.n_ctx}, Max tokens: {args.max_tokens}")
+        enable_cache_eviction = not args.no_cache_eviction
+        logger.info(
+            f"Server starting. Model: {args.model}, Device: {args.device}, "
+            f"Context: {args.n_ctx}, Max tokens: {args.max_tokens}, "
+            f"KV precision: {args.kv_cache_precision}, Cache eviction: {enable_cache_eviction}"
+        )
         
         global_config = {
             'temperature': args.temperature,
             'top_p': args.top_p,
-            'max_tokens': args.max_tokens
+            'max_tokens': args.max_tokens,
+            'kv_cache_precision': args.kv_cache_precision,
+            'cache_eviction': enable_cache_eviction,
         }
 
-        scheduler_config = ov_genai.SchedulerConfig()
-        scheduler_config.max_num_batched_tokens = args.batch_size
-        scheduler_config.num_kv_blocks = args.n_ctx // 16
-        scheduler_config.dynamic_split_fuse = True
-        scheduler_config.enable_prefix_caching = True
+        scheduler_config = build_scheduler_config(args.n_ctx, args.batch_size, enable_cache_eviction)
+        pipeline_properties = {"KV_CACHE_PRECISION": args.kv_cache_precision}
         
         logger.info("Initializing ContinuousBatchingPipeline...")
-        pipe = ov_genai.ContinuousBatchingPipeline(args.model, scheduler_config, args.device)
+        pipe = ov_genai.ContinuousBatchingPipeline(
+            args.model, scheduler_config, args.device, pipeline_properties
+        )
         tokenizer = pipe.get_tokenizer()
 
         logger.info("Starting worker thread...")
