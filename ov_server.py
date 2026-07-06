@@ -5,7 +5,6 @@ import time
 import uuid
 import threading
 import queue
-import datetime
 import traceback
 import logging
 from typing import List, Optional, Union, Dict, Any
@@ -30,10 +29,6 @@ logging.basicConfig(
     format='[%(asctime)s.%(msecs)03d] %(levelname)s: %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
-
-def log(msg):
-    # Backward compatibility for my internal calls, now uses logger
-    logger.info(msg)
 
 app = FastAPI(title="OpenVINO GPU API (Continuous Batching)")
 
@@ -174,6 +169,15 @@ class ChatCompletionRequest(BaseModel):
     stream: Optional[bool] = False
     stop: Optional[Union[str, List[str]]] = None
 
+@app.get("/health")
+async def health():
+    return {
+        "status": "ok" if pipe is not None else "loading",
+        "model_loaded": pipe is not None,
+        "model": model_name,
+        "active_requests": len(active_requests),
+    }
+
 @app.get("/v1/models")
 async def list_models():
     return {
@@ -303,6 +307,7 @@ if __name__ == "__main__":
         parser.add_argument("--model", type=str, required=True, help="Path to OpenVINO model directory")
         parser.add_argument("--device", type=str, default="GPU", help="Inference device (GPU, CPU, etc.)")
         parser.add_argument("--port", type=int, default=8000, help="Server port")
+        parser.add_argument("--host", type=str, default="127.0.0.1", help="Bind address (use 0.0.0.0 to expose on LAN)")
         parser.add_argument("--n_ctx", type=int, default=32768, help="Context window size")
         parser.add_argument("--batch_size", type=int, default=128, help="Max num batched tokens (prefill chunk)")
         parser.add_argument("--temperature", type=float, default=0.7, help="Default temperature")
@@ -338,7 +343,7 @@ if __name__ == "__main__":
         worker_thread.start()
 
         import uvicorn
-        logger.info(f"Starting Uvicorn on port {args.port}...")
-        uvicorn.run(app, host="0.0.0.0", port=args.port)
+        logger.info(f"Starting Uvicorn on {args.host}:{args.port}...")
+        uvicorn.run(app, host=args.host, port=args.port)
     except Exception as e:
         logger.error(f"FATAL STARTUP ERROR: {e}\n{traceback.format_exc()}")

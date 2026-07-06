@@ -181,6 +181,14 @@ def model_loader_thread(model_path, device):
         logger.error(f"!!! FATAL ERROR IN LOADER: {e}")
         logger.error(traceback.format_exc())
 
+@app.get("/health")
+async def health():
+    return {
+        "status": "ok" if is_ready else "loading",
+        "model_loaded": is_ready,
+        "model": model_name,
+    }
+
 @app.get("/v1/models")
 async def list_models():
     return {
@@ -260,6 +268,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", type=str, required=True)
     parser.add_argument("--device", type=str, default="GPU")
     parser.add_argument("--port", type=int, default=8001)
+    parser.add_argument("--host", type=str, default="127.0.0.1", help="Bind address (use 0.0.0.0 to expose on LAN)")
     parser.add_argument("--log_level", type=str, default="INFO")
     args = parser.parse_args()
 
@@ -277,4 +286,4 @@ if __name__ == "__main__":
     loader.start()
     
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=args.port)
+    uvicorn.run(app, host=args.host, port=args.port)

@@ -96,7 +96,12 @@ Each model has its own optimized launch script. Before running, ensure you have 
 ```
 
 ### API Endpoint (OpenAI Compatible)
-The server runs on `http://localhost:8000`. You can point any OpenAI-compatible client (Aider, Continue.dev, VS Code extensions) to this URL.
+The server binds to `127.0.0.1` by default (localhost only). Use `--host 0.0.0.0` to expose on the LAN.
+
+**Health check:**
+```bash
+curl http://localhost:8000/health
+```
 
 **Example Request:**
 ```bash
@@ -110,11 +115,47 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 ```
 
 ## Project Structure
-*   `ov_server.py`: Core FastAPI wrapper for OpenVINO GenAI.
-*   `diffusion_server.py`: Core FastAPI wrapper to run diffusion llms
-*   `start_*.sh`: Model-specific orchestration scripts.
-*   `test_ov.py`: Diagnostic tool for GPU memory and device properties.
-*   `requirements.txt`: Python dependencies.
+
+```
+lmm_gpu/
+├── ov_server.py              # AR LLM server (Continuous Batching, streaming SSE, port 8000)
+├── diffusion_server.py       # Diffusion LLM server (LocalLeap, ports 8001/8002)
+├── convert_to_ov.py          # HF → OpenVINO IR conversion (requires torch, nncf)
+├── benchmark.py              # Tokens/sec benchmark utility
+├── push_to_hf.py             # Upload converted models to Hugging Face Hub
+├── requirements.txt          # Python dependencies
+├── LICENSE                   # MIT License
+│
+├── start_*.sh                # Model launch scripts (see table below)
+├── run_benchmarks.sh         # Batch benchmark runner
+│
+├── test_ov.py                # OpenVINO device diagnostics
+├── test_ov_fp16.py           # FP16 model smoke test
+├── test_gpu_capacity.py      # Batch size / prefill stress test
+├── test_agent_workload.py    # E2E streaming test with large context
+│
+└── models/                   # Local model weights (gitignored, downloaded from HF)
+```
+
+### Launch Scripts
+
+| Script | Model | Port |
+| :--- | :--- | :--- |
+| `start_api.sh` | DeepSeek-R1-Distill-Qwen-7B | 8000 |
+| `start_deepseek-r1-7b.sh` | DeepSeek-R1-Distill-Qwen-7B | 8000 |
+| `start_deepseek-r1-1.5b.sh` | DeepSeek-R1-Distill-Qwen-1.5B | 8000 |
+| `start_qwen3-8b.sh` | Qwen3-8B-Instruct | 8000 |
+| `start_qwen2.5-coder-7b.sh` | Qwen2.5-Coder-7B-Instruct | 8000 |
+| `start_gemma2-9b.sh` | Gemma-2-9B-it | 8000 |
+| `start_gemma3-12b.sh` | Gemma-3-12B-it | 8000 |
+| `start_mistral-7b.sh` | Mistral-7B-Instruct-v0.3 | 8000 |
+| `start_mistral-nemo-12b.sh` | Mistral-Nemo-12B-Instruct | 8000 |
+| `start_phi-3-medium.sh` | Phi-3-medium-4k-instruct | 8000 |
+| `start_phi-4-reasoning.sh` | Phi-4-reasoning | 8000 |
+| `start_glm-4-9b.sh` | GLM-4-9B-Chat | 8000 |
+| `start_opencoder-8b.sh` | OpenCoder-8B-Instruct | 8000 |
+| `start_diffucoder.sh` | DiffuCoder-7B | 8001 |
+| `start_dream_coder.sh` | Dream-Coder-7B | 8002 |
 
 ## License
-MIT License. Check individual model licenses (mostly Apache 2.0).
+MIT License — see [LICENSE](LICENSE). Check individual model licenses (mostly Apache 2.0).
