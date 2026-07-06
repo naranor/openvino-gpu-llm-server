@@ -1,7 +1,15 @@
-fastapi
-uvicorn
-openvino-genai
-huggingface_hub
-pydantic
-optimum-intel
-numpy
+# Core server (ov_server.py, diffusion_server.py)
+fastapi>=0.115.0,<1.0
+uvicorn[standard]>=0.30.0,<1.0
+openvino-genai>=2026.1.0
+openvino>=2026.1.0
+huggingface_hub>=0.27.0
+pydantic>=2.0.0,<3.0
+numpy>=1.26.0,<3.0
+transformers>=4.45.0
+
+# Diagnostics & integration tests
+requests>=2.32.0
+
+# Model conversion (convert_to_ov.py) — install separately if needed:
+#   pip install torch nncf
